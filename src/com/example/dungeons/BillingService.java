@@ -189,7 +189,9 @@ public class BillingService extends Service implements ServiceConnection {
         protected long run() throws RemoteException {
             Bundle request = makeRequestBundle("CHECK_BILLING_SUPPORTED");
             Bundle response = mService.sendBillingRequest(request);
-            int responseCode = response.getInt(Consts.BILLING_RESPONSE_RESPONSE_CODE);
+            int responseCode = response.containsKey(Consts.BILLING_RESPONSE_RESPONSE_CODE)
+                               ? response.getInt(Consts.BILLING_RESPONSE_RESPONSE_CODE)
+                               : ResponseCode.RESULT_BILLING_UNAVAILABLE.ordinal();
             if (Consts.DEBUG) {
                 Log.i(TAG, "CheckBillingSupported response code: " +
                         ResponseCode.valueOf(responseCode));
@@ -358,6 +360,18 @@ public class BillingService extends Service implements ServiceConnection {
     @Override
     public void onStart(Intent intent, int startId) {
         handleCommand(intent, startId);
+    }
+
+    // Overrides onStartCommand for people who build on SDK versions > 4.
+    // Override annotation is commented out as the method does not always exist.
+    // @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null) {
+            stopSelfResult(startId);
+            return;
+        }
+        handleCommand(intent, startId);
+        return 0;  // Service.START_STICKY_COMPATIBILITY
     }
 
     /**
