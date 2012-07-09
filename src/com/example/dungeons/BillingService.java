@@ -431,10 +431,11 @@ public class BillingService extends Service implements ServiceConnection {
     }
 
     /**
-     * Checks if in-app billing is supported.
-     * @return true if supported; false otherwise
+     * Checks if in-app billing is supported. The result is asynchronously returned to the
+     * application via ResponseHandler.checkBillingSupported.
+     * @return false if there was an error connecting to Android Market
      */
-    public boolean checkBillingSupported() {
+     public boolean checkBillingSupported() {
         return new CheckBillingSupported().runRequest();
     }
 
