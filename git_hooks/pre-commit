@@ -1,0 +1,43 @@
+#!/bin/sh
+RIGHT_PKG_NAME=com.example.android.trivialdrivesample
+
+# Check that there isn't a NOCOMMIT flag
+if find . -name CONFIDENTIAL | grep -q CONFIDENTIAL; then
+   echo "*** The working directory is marked as CONFIDENTIAL"
+   echo "If you're really ready to commit, remove the CONFIDENTIAL files and try again:"
+   find . -name CONFIDENTIAL
+   exit 2
+fi
+
+# Check that there's only one package name line in v3/AndroidManifest.xml
+echo "Checking package name in v3/AndroidManifest.xml"
+packages=`grep package= v3/AndroidManifest.xml | wc -l`
+if [ "$packages" -ne 1 ]; then
+   echo "*** There are $packages package= lines in v3/AndroidManifest.xml."
+   echo "There should be exactly 1."
+   exit 1
+fi
+
+# Check that it's the right package name
+if ! (grep package= v3/AndroidManifest.xml | grep -q $RIGHT_PKG_NAME); then
+   echo "*** Package name is wrong in v3/AndroidManifest.xml."
+   echo "It should be $RIGHT_PKG_NAME."
+   exit 1
+fi
+
+# Check that MainActivity.java has a placeholder key, not an actual key
+echo "Checking for placeholder keys."
+unexpected_keys=`find . -name Dungeons.java -o -name MainActivity.java -exec grep -E 'base64EncodedPublicKey *=' {} \; | grep -v CONSTRUCT_YOUR`
+
+if [ -n "$unexpected_keys" ]; then
+   echo "*** There are unexpected keys lying around in the code."
+   echo "Make sure all actual keys are replaced with the CONSTRUCT_YOUR_*"
+   echo "placeholder key before comitting."
+   echo
+   echo "Unexpected keys:"
+   echo "$unexpected_keys"
+   exit 1
+fi
+
+echo "All presubmit checks passed."
+

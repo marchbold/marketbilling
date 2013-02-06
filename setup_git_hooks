@@ -1,0 +1,3 @@
+#!/bin/sh
+cd .git/hooks
+ln -sf ../../git_hooks/* .
