@@ -1,0 +1,72 @@
+#!/bin/sh
+# Copyright (c) 2012 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# errors are fatal
+set -ve
+trap "echo '***ABORTED***'" ERR
+
+# directories and files
+TD=/tmp/make_deployable_$$_$RANDOM
+ZIPROOTNAME=play_billing_r03
+ZIPROOT=$TD/$ZIPROOTNAME
+TRIVIALDRIVE=$ZIPROOT/samples/TrivialDrive
+V2ZIP=$PWD/market_billing_r02.zip
+
+ORIGWD=$PWD
+
+# work from v3 root directory
+cd ../v3
+
+# make sure sample is in "public" mode, that is, with the
+# placeholder key in it
+MAINACTIVITY=src/com/example/android/trivialdrivesample/MainActivity.java
+if ! [ -f $MAINACTIVITY ]; then
+   echo "Can't find $MAINACTIVITY."
+   echo "Is the package name set to com.example.android.trivialdrivesample?"
+   exit 2
+fi
+if ! grep -q CONSTRUCT_YOUR_KEY_AND_PLACE_IT_HERE $MAINACTIVITY; then
+   echo "The key in MainActivity.java must be the placeholder key!"
+   exit 2
+fi
+
+# make sure sample doesn't have bogus source directories that might
+# have been left behind as an artifact while testing
+set +e
+trash=`find src -type d | grep -v src/com/android | grep -v src/com/example | grep -v '^src$' | grep -v '^src/com$'` 
+set -e
+if ! [ -z "$trash" ]; then
+   echo "*** src dir has unexpected directories in it:"
+   echo "$trash"
+   exit 2
+fi
+
+mkdir -p $TD
+echo "Making deployable ZIP (using $TD as temp directory)."
+
+rm -rf $TRIVIALDRIVE
+mkdir -p $TRIVIALDRIVE
+cp -va res src libs AndroidManifest.xml README project.properties $TRIVIALDRIVE
+cp -va src/com/android/vending/billing/IInAppBillingService.aidl $ZIPROOT
+cp -v $ORIGWD/../v3/README $ZIPROOT
+cp -v $V2ZIP $ZIPROOT
+
+cd $TD
+rm -f /tmp/$ZIPROOTNAME.zip
+zip -r /tmp/$ZIPROOTNAME.zip $ZIPROOTNAME
+
+rm -rf $TD
+echo "ZIP created: /tmp/$ZIPROOTNAME.zip"
+
