@@ -19,7 +19,7 @@ trap "echo '***ABORTED***'" ERR
 
 # directories and files
 TD=/tmp/make_deployable_$$_$RANDOM
-ZIPROOTNAME=play_billing_r03
+ZIPROOTNAME=play_billing
 ZIPROOT=$TD/$ZIPROOTNAME
 TRIVIALDRIVE=$ZIPROOT/samples/TrivialDrive
 V2ZIP=$PWD/market_billing_r02.zip
