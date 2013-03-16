@@ -42,7 +42,7 @@ HOW TO RUN THIS SAMPLE
 
    3. In that app, create a SUBSCRIPTION items with this ID:
           infinite_gas
-      Set the price to 1 dollar and the billing recurrence to montly. Just so
+      Set the price to 1 dollar and the billing recurrence to monthly. Just so
       you are not immediately charged when you test it, set the trial period to
       seven days. 
 
