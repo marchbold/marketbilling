@@ -368,7 +368,7 @@ public class BillingService extends Service implements ServiceConnection {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
             stopSelfResult(startId);
-            return;
+            return 0;
         }
         handleCommand(intent, startId);
         return 0;  // Service.START_STICKY_COMPATIBILITY
