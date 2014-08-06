@@ -906,7 +906,6 @@ public class IabHelper {
             }
         }
 
-
         if (skuList.size() == 0) {
             logDebug("queryPrices: nothing to do because there are no SKUs.");
             return BILLING_RESPONSE_RESULT_OK;
@@ -917,48 +916,46 @@ public class IabHelper {
         ArrayList<String> tempList;
         int n = skuList.size() / 20;
         int mod = skuList.size() % 20;
-        for (int i = 0 ; i < n ; i++) {
+        for (int i = 0; i < n; i++) {
             tempList = new ArrayList<String>();
-            for (String s : skuList.subList(i*20, i*20+20)) {
+            for (String s : skuList.subList(i * 20, i * 20 + 20)) {
                 tempList.add(s);
             }
             packs.add(tempList);
         }
         if (mod != 0) {
             tempList = new ArrayList<String>();
-            for (String s : skuList.subList(n*20, n*20+mod)) {
+            for (String s : skuList.subList(n * 20, n * 20 + mod)) {
                 tempList.add(s);
             }
             packs.add(tempList);
+        }
 
-            for (ArrayList<String> skuPartList : packs) {
-                Bundle querySkus = new Bundle();
-                querySkus.putStringArrayList(GET_SKU_DETAILS_ITEM_LIST, skuPartList);
-                Bundle skuDetails = mService.getSkuDetails(3, mContext.getPackageName(),
-                        itemType, querySkus);
+        for (ArrayList<String> skuPartList : packs) {
+            Bundle querySkus = new Bundle();
+            querySkus.putStringArrayList(GET_SKU_DETAILS_ITEM_LIST, skuPartList);
+            Bundle skuDetails = mService.getSkuDetails(3, mContext.getPackageName(),
+                    itemType, querySkus);
 
-                if (!skuDetails.containsKey(RESPONSE_GET_SKU_DETAILS_LIST)) {
-                    int response = getResponseCodeFromBundle(skuDetails);
-                    if (response != BILLING_RESPONSE_RESULT_OK) {
-                        logDebug("getSkuDetails() failed: " + getResponseDesc(response));
-                        return response;
-                    }
-                    else {
-                        logError("getSkuDetails() returned a bundle with neither an error nor a detail list.");
-                        return IABHELPER_BAD_RESPONSE;
-                    }
-                }
-
-                ArrayList<String> responseList = skuDetails.getStringArrayList(
-                        RESPONSE_GET_SKU_DETAILS_LIST);
-
-                for (String thisResponse : responseList) {
-                    SkuDetails d = new SkuDetails(itemType, thisResponse);
-                    logDebug("Got sku details: " + d);
-                    inv.addSkuDetails(d);
+            if (!skuDetails.containsKey(RESPONSE_GET_SKU_DETAILS_LIST)) {
+                int response = getResponseCodeFromBundle(skuDetails);
+                if (response != BILLING_RESPONSE_RESULT_OK) {
+                    logDebug("getSkuDetails() failed: " + getResponseDesc(response));
+                    return response;
+                } else {
+                    logError("getSkuDetails() returned a bundle with neither an error nor a detail list.");
+                    return IABHELPER_BAD_RESPONSE;
                 }
             }
 
+            ArrayList<String> responseList = skuDetails.getStringArrayList(
+                    RESPONSE_GET_SKU_DETAILS_LIST);
+
+            for (String thisResponse : responseList) {
+                SkuDetails d = new SkuDetails(itemType, thisResponse);
+                logDebug("Got sku details: " + d);
+                inv.addSkuDetails(d);
+            }
         }
 
         return BILLING_RESPONSE_RESULT_OK;
